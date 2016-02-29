@@ -1,12 +1,10 @@
 goog.provide('fontface.Observer');
 
 goog.require('fontface.Ruler');
-goog.require('fontface.Detector');
 goog.require('dom');
 
 goog.scope(function () {
   var Ruler = fontface.Ruler;
-  var Detector = fontface.Detector;
 
   /**
    * @constructor
@@ -123,32 +121,22 @@ goog.scope(function () {
     return new Date().getTime();
   };
 
-
-  Observer.prototype.testLocal = function(family){
-    console.log(family);
-    var d = new Detector(family);
-    return d.detect();
-  };
-
   /**
    * @param {string=} text Optional test string to use for detecting if a font is available.
    * @param {number=} timeout Optional timeout for giving up on font load detection and rejecting the promise (defaults to 3 seconds).
+   * @param {boolean=} locally Optional option to use for detecting if a font is installed locally (simply ignores native implementation)
    * @return {Promise.<fontface.Observer>}
    */
-  Observer.prototype.check = function (text, timeout) {
+  Observer.prototype.check = function (text, timeout, locally) {
     var that = this;
     var testString = text || 'BESbswy';
     var timeoutValue = timeout || Observer.DEFAULT_TIMEOUT;
+    var testLocally = locally || false;
     var start = that.getTime();
 
     return new Promise(function (resolve, reject) {
 
-      // Check for font installed locally
-      if(Observer.testLocal(that['family'])){
-        resolve(that);
-      }
-
-      if (Observer.SUPPORTS_NATIVE) {
+      if (Observer.SUPPORTS_NATIVE && !testLocally) {
         var check = function () {
           var now = that.getTime();
 
